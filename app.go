@@ -4,11 +4,11 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
+	"log"
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
-  "fmt"
-  "log"
 )
 
 type App struct {
