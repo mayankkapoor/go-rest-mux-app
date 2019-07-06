@@ -2,7 +2,9 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
+	"os"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
@@ -10,6 +12,13 @@ import (
 
 var db *sql.DB
 var err error
+
+func getEnv(key, fallback string) string {
+	if value, ok := os.LookupEnv(key); ok {
+		return value
+	}
+	return fallback
+}
 
 func main() {
 	// Establish DB connection
@@ -27,5 +36,9 @@ func main() {
 	router.HandleFunc("/posts/{id}", updatePost).Methods("PUT")
 	router.HandleFunc("/posts/{id}", deletePost).Methods("DELETE")
 
-	http.ListenAndServe(":8000", router)
+	serverPort := getEnv("APP_SERVER_PORT", "8000")
+	serverPortText := fmt.Sprintf("%s%s", ":", serverPort)
+
+	fmt.Printf("API server listening on port %v\n", serverPort)
+	http.ListenAndServe(serverPortText, router)
 }
