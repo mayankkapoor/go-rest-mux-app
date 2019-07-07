@@ -20,6 +20,11 @@ func getEnv(key, fallback string) string {
 	return fallback
 }
 
+// Sum computes sum of two integers
+func Sum(x int, y int) int {
+	return x + y
+}
+
 func main() {
 	// Establish DB connection
 	db, err = sql.Open("mysql", "mayankkapoor:password@tcp(127.0.0.1:3306)/dev")
