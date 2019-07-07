@@ -1,10 +1,19 @@
 # build stage
-FROM golang:alpine AS build-env
-ADD . /src
-RUN cd /src && go build -o goapp
+FROM golang:1.12-alpine AS build-env
+RUN apk add --no-cache git mercurial \
+   && go get github.com/go-sql-driver/mysql \
+   && go get github.com/gorilla/mux \
+   && apk del git mercurial
 
-# final stage
+WORKDIR /usr/src/app
+
+COPY . .
+RUN go build -o goapp
+
+# final stage: Create image with only build artifacts
 FROM alpine
-WORKDIR /app
-COPY --from=build-env /src/goapp /app/
+WORKDIR /usr/local/bin
+COPY --from=build-env /usr/src/app/goapp /usr/local/bin/
+
+EXPOSE 8000
 ENTRYPOINT ./goapp

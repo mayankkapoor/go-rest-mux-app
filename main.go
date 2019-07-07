@@ -27,7 +27,11 @@ func Sum(x int, y int) int {
 
 func main() {
 	// Establish DB connection
-	db, err = sql.Open("mysql", "mayankkapoor:password@tcp(127.0.0.1:3306)/dev")
+	// If your database is not running on localhost 127.0.0.1, update the env
+	// variable DB_URL with the database full connection string. E.g.,
+	// $ docker run -d -p 8000:8000 -e DB_URL='mayankkapoor:password@tcp(host.docker.internal:3306)/dev' registry.gitlab.com/mayankkapoor/go-rest-mux-app:latest
+	databaseURL := getEnv("DB_URL", "mayankkapoor:password@tcp(127.0.0.1:3306)/dev")
+	db, err = sql.Open("mysql", databaseURL)
 	if err != nil {
 		panic(err.Error())
 	}
