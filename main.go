@@ -7,7 +7,6 @@ import (
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/gorilla/mux"
 )
 
 var db *sql.DB
@@ -41,14 +40,7 @@ func main() {
 	}
 	defer db.Close()
 
-	// Create router and routes
-	router := mux.NewRouter()
-	router.HandleFunc("/posts", getPosts).Methods("GET")
-	router.HandleFunc("/posts", createPost).Methods("POST")
-	router.HandleFunc("/posts/{id}", getPost).Methods("GET")
-	router.HandleFunc("/posts/{id}", updatePost).Methods("PUT")
-	router.HandleFunc("/posts/{id}", deletePost).Methods("DELETE")
-	router.HandleFunc("/", healthCheck).Methods("GET")
+	router := NewRouter()
 
 	serverPort := getEnv("APP_SERVER_PORT", "8000")
 	serverPortText := fmt.Sprintf("%s%s", ":", serverPort)
