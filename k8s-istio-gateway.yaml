@@ -26,6 +26,8 @@ spec:
   - match:
     - uri:
         prefix: /posts
+    - uri:
+        exact: /
     route:
     - destination:
         host: goapp-service
