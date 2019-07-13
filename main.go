@@ -20,6 +20,10 @@ func getEnv(key, fallback string) string {
 	return fallback
 }
 
+func healthCheck(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Service health is OK!")
+}
+
 // Sum computes sum of two integers
 func Sum(x int, y int) int {
 	return x + y
@@ -44,6 +48,7 @@ func main() {
 	router.HandleFunc("/posts/{id}", getPost).Methods("GET")
 	router.HandleFunc("/posts/{id}", updatePost).Methods("PUT")
 	router.HandleFunc("/posts/{id}", deletePost).Methods("DELETE")
+	router.HandleFunc("/", healthCheck).Methods("GET")
 
 	serverPort := getEnv("APP_SERVER_PORT", "8000")
 	serverPortText := fmt.Sprintf("%s%s", ":", serverPort)
