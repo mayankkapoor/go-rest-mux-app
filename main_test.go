@@ -8,8 +8,9 @@ import (
 
 func TestSum(t *testing.T) {
 	total := Sum(5, 4)
-	if total != 9 {
-		t.Errorf("Sum was incorrect, got: %d, want: %d.", total, 9)
+	expected := 9
+	if total != expected {
+		t.Errorf("Sum was incorrect, got: %d, expected: %d.", total, expected)
 	}
 
 }
