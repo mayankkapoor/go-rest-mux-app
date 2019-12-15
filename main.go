@@ -1,3 +1,5 @@
+// main.go
+
 package main
 
 import (
@@ -29,12 +31,18 @@ func Sum(x int, y int) int {
 }
 
 func main() {
-	// Establish DB connection
-	// If your database is not running on localhost 127.0.0.1, update the env
-	// variable DB_URL with the database full connection string. E.g.,
-	// $ docker run -d -p 8000:8000 -e DB_URL='mayankkapoor:password@tcp(host.docker.internal:3306)/dev' registry.gitlab.com/mayankkapoor/go-rest-mux-app:latest
-	databaseURL := getEnv("DB_URL", "mayankkapoor:password@tcp(127.0.0.1:3306)/dev")
-	db, err = sql.Open("mysql", databaseURL)
+	// Establish DB connection:
+	// Update the .env file with DB_URL & DB_NAME in .env file, then source .env file
+	// To run the app, run $ go build to build the binary and then $ ./go-rest-mux-app
+	// to run the app.
+	// To run the app within docker, following command runs the app on
+	// localhost port 8080. It uses the --env flags to inject the database
+	// variables. "host.docker.internal" is used instead of db server IP if your
+	// database is also running within docker.
+	// $ docker run -d -p 8080:8000 --env DB_URL='mayankkapoor:password@tcp(host.docker.internal:3306)/' --env DB_NAME='dev' registry.gitlab.com/mayankkapoor/go-rest-mux-app:latest
+	databaseURL := getEnv("DB_URL", "mayankkapoor:password@tcp(localhost:3306)/")
+	dbName := getEnv("DB_NAME", "dev")
+	db, err = sql.Open("mysql", databaseURL+dbName)
 	if err != nil {
 		panic(err.Error())
 	}
