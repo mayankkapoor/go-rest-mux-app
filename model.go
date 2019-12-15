@@ -13,30 +13,63 @@ import (
 
 // A post object has an auto-generated id and a title
 type post struct {
-	ID    string `json:"id"`    // auto-generated id
+	ID    int    `json:"id"`    // auto-generated id
 	Title string `json:"title"` // Title of the Post
 	//Body  string `json:"body"`// Body of the Post
 }
 
-func (a *api) getPosts(w http.ResponseWriter, r *http.Request) {
+func (a *api) fail(w http.ResponseWriter, msg string, status int) {
 	w.Header().Set("Content-Type", "application/json")
-	var posts []post
+
+	data := struct {
+		Error string
+	}{Error: msg}
+
+	resp, _ := json.Marshal(data)
+	w.WriteHeader(status)
+	w.Write(resp)
+}
+
+func (a *api) ok(w http.ResponseWriter, data interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+
+	resp, err := json.Marshal(data)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		a.fail(w, "oops something evil has happened", 500)
+		return
+	}
+	w.Write(resp)
+}
+
+func (a *api) getPosts(w http.ResponseWriter, r *http.Request) {
+	var posts []*post
 	rows, err := a.db.Query("SELECT id, title FROM posts")
 	if err != nil {
-		panic(err.Error())
+		a.fail(w, "failed to fetch posts: "+err.Error(), 500)
+		return
 	}
 	defer rows.Close()
 
 	for rows.Next() {
-		var singlePost post
-		err := rows.Scan(&singlePost.ID, &singlePost.Title)
+		p := &post{}
+		err := rows.Scan(&p.ID, &p.Title)
 		if err != nil {
-			panic(err.Error())
+			a.fail(w, "failed to scan post: "+err.Error(), 500)
+			return
 		}
-		posts = append(posts, singlePost)
+		posts = append(posts, p)
+	}
+	if rows.Err() != nil {
+		a.fail(w, "failed to read all posts: "+rows.Err().Error(), 500)
+		return
 	}
 
-	json.NewEncoder(w).Encode(posts)
+	data := struct {
+		Posts []*post
+	}{posts}
+
+	a.ok(w, data)
 }
 
 func (a *api) createPost(w http.ResponseWriter, r *http.Request) {
@@ -63,7 +96,6 @@ func (a *api) createPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *api) getPost(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
 
 	rows, err := a.db.Query("SELECT id, title FROM posts WHERE id = ?", params["id"])
@@ -72,15 +104,16 @@ func (a *api) getPost(w http.ResponseWriter, r *http.Request) {
 	}
 	defer rows.Close()
 
-	var singlePost post
+	p := &post{}
 	for rows.Next() {
-		err := rows.Scan(&singlePost.ID, &singlePost.Title)
+		err := rows.Scan(&p.ID, &p.Title)
 		if err != nil {
-			panic(err.Error())
+			a.fail(w, "failed to scan post: "+err.Error(), 500)
+			return
 		}
 	}
 
-	json.NewEncoder(w).Encode(singlePost)
+	a.ok(w, p)
 }
 
 func (a *api) updatePost(w http.ResponseWriter, r *http.Request) {

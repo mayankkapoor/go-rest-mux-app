@@ -23,6 +23,7 @@ before_script:
   - ln -svf $CI_PROJECT_DIR $GOPATH/src/$REPO_NAME
   - cd $GOPATH/src/$REPO_NAME
   - go get -v
+  - go get github.com/DATA-DOG/go-sqlmock
 
 stages:
   - test
@@ -34,7 +35,12 @@ test:
   script:
     - go fmt ./...
     - go vet ./...
-    - go test -v
+    - go test -coverprofile=coverage.out -v
+    - go tool cover -func=coverage.out
+  artifacts:
+    paths:
+    - coverage.out
+    expire_in: 1 week   
 
 build-master:
   # Official docker image.
