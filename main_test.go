@@ -137,3 +137,66 @@ func TestGetPost(t *testing.T) {
 	}
 
 }
+
+func TestUpdatePost(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+
+	// create app with mocked db, request and response to test
+	app := &api{db}
+	requestBody, err := json.Marshal(map[string]string{
+		"title": "My second post updated",
+	})
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected while creating json", err)
+	}
+	req, err := http.NewRequest("PUT", "http://localhost/posts/2", bytes.NewBuffer(requestBody))
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected while creating request", err)
+	}
+	w := httptest.NewRecorder()
+
+	// mux can get the "id" param from URL, however http.NewRequest doesn't understand posts/{id}
+	// Therefore, second argument will be blank
+	mock.ExpectPrepare("^UPDATE posts SET title = (.+) WHERE id = (.+)$").ExpectExec().WithArgs("My second post updated", "").WillReturnResult(sqlmock.NewResult(1, 1))
+
+	// now we execute our request
+	app.updatePost(w, req)
+
+	if w.Code != 200 {
+		t.Fatalf("expected status code to be 200, but got: %d", w.Code)
+	}
+
+}
+
+func TestDeletePost(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+
+	// create app with mocked db, request and response to test
+	app := &api{db}
+
+	req, err := http.NewRequest("DELETE", "http://localhost/posts/2", nil)
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected while creating request", err)
+	}
+	w := httptest.NewRecorder()
+
+	// mux can get the "id" param from URL, however http.NewRequest doesn't understand posts/{id}
+	// Therefore, argument will be blank
+	mock.ExpectPrepare("^DELETE FROM posts WHERE id = (.+)$").ExpectExec().WithArgs("").WillReturnResult(sqlmock.NewResult(1, 1))
+
+	// now we execute our request
+	app.deletePost(w, req)
+
+	if w.Code != 200 {
+		t.Fatalf("expected status code to be 200, but got: %d", w.Code)
+	}
+
+}
