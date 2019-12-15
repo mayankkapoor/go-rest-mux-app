@@ -15,5 +15,5 @@ services:
     ports:
       - 3306:3306
     volumes:
-      - /tmp/mysql-db:/var/lib/mysql
+      - /Users/mayankkapoor/docker-volumes/mysql-db:/var/lib/mysql
 
