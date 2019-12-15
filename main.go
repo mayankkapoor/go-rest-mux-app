@@ -52,9 +52,9 @@ func main() {
 	app := &api{db: db}
 	router := NewRouter(app)
 
-	serverPort := getEnv("APP_SERVER_PORT", "8000")
-	serverPortText := fmt.Sprintf("%s%s", ":", serverPort)
+	servicePort := getEnv("SERVICE_PORT", "8000")
+	servicePortText := fmt.Sprintf("%s%s", ":", servicePort)
 
-	fmt.Printf("API server listening on port %v\n", serverPort)
-	http.ListenAndServe(serverPortText, router)
+	fmt.Printf("API server listening on port %v\n", servicePort)
+	http.ListenAndServe(servicePortText, router)
 }
