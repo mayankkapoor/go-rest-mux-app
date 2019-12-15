@@ -23,7 +23,7 @@ func getEnv(key, fallback string) string {
 }
 
 func healthCheck(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Service health is OK!")
+	fmt.Fprintf(w, "HealthCheck: Service is up!")
 }
 
 // Sum computes sum of two integers
