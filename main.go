@@ -11,8 +11,9 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-var db *sql.DB
-var err error
+type api struct {
+	db *sql.DB
+}
 
 func getEnv(key, fallback string) string {
 	if value, ok := os.LookupEnv(key); ok {
@@ -42,13 +43,14 @@ func main() {
 	// $ docker run -d -p 8080:8000 --env DB_URL='mayankkapoor:password@tcp(host.docker.internal:3306)/' --env DB_NAME='dev' registry.gitlab.com/mayankkapoor/go-rest-mux-app:latest
 	databaseURL := getEnv("DB_URL", "mayankkapoor:password@tcp(localhost:3306)/")
 	dbName := getEnv("DB_NAME", "dev")
-	db, err = sql.Open("mysql", databaseURL+dbName)
+	db, err := sql.Open("mysql", databaseURL+dbName)
 	if err != nil {
 		panic(err.Error())
 	}
 	defer db.Close()
 
-	router := NewRouter()
+	app := &api{db: db}
+	router := NewRouter(app)
 
 	serverPort := getEnv("APP_SERVER_PORT", "8000")
 	serverPortText := fmt.Sprintf("%s%s", ":", serverPort)
