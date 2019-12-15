@@ -37,10 +37,11 @@ test:
     - go vet ./...
     - go test -coverprofile=coverage.out -v
     - go tool cover -func=coverage.out
+    - go tool cover -html=coverage.out -o coverage.html
   artifacts:
     paths:
-    - coverage.out
-    expire_in: 1 week   
+    - coverage.html
+    expire_in: 1 week
 
 build-master:
   # Official docker image.
