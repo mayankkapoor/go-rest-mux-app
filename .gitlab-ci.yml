@@ -23,6 +23,7 @@ before_script:
   - ln -svf $CI_PROJECT_DIR $GOPATH/src/$REPO_NAME
   - cd $GOPATH/src/$REPO_NAME
   - go get -v
+  - go get github.com/DATA-DOG/go-sqlmock
 
 stages:
   - test
