@@ -96,7 +96,6 @@ func (a *api) createPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *api) getPost(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
 
 	rows, err := a.db.Query("SELECT id, title FROM posts WHERE id = ?", params["id"])
@@ -105,15 +104,16 @@ func (a *api) getPost(w http.ResponseWriter, r *http.Request) {
 	}
 	defer rows.Close()
 
-	var singlePost post
+	p := &post{}
 	for rows.Next() {
-		err := rows.Scan(&singlePost.ID, &singlePost.Title)
+		err := rows.Scan(&p.ID, &p.Title)
 		if err != nil {
-			panic(err.Error())
+			a.fail(w, "failed to scan post: "+err.Error(), 500)
+			return
 		}
 	}
 
-	json.NewEncoder(w).Encode(singlePost)
+	a.ok(w, p)
 }
 
 func (a *api) updatePost(w http.ResponseWriter, r *http.Request) {

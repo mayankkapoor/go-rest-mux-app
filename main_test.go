@@ -75,3 +75,65 @@ func TestGetPostsReturnsPosts(t *testing.T) {
 	}
 
 }
+
+func TestCreatePost(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+
+	// create app with mocked db, request and response to test
+	app := &api{db}
+	requestBody, err := json.Marshal(map[string]string{
+		"title": "My second post",
+	})
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected while creating json", err)
+	}
+	req, err := http.NewRequest("POST", "http://localhost/posts", bytes.NewBuffer(requestBody))
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected while creating request", err)
+	}
+	w := httptest.NewRecorder()
+
+	mock.ExpectPrepare("^INSERT INTO posts*").ExpectExec().WithArgs("My second post").WillReturnResult(sqlmock.NewResult(1, 1))
+
+	// now we execute our request
+	app.createPost(w, req)
+
+	if w.Code != 200 {
+		t.Fatalf("expected status code to be 200, but got: %d", w.Code)
+	}
+
+}
+
+func TestGetPost(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+
+	// create app with mocked db, request and response to test
+	app := &api{db}
+	req, err := http.NewRequest("GET", "http://localhost/posts/4", nil)
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected while creating request", err)
+	}
+	w := httptest.NewRecorder()
+
+	// before we actually execute our api function, we need to expect required DB actions
+	rows := sqlmock.NewRows([]string{"id", "title"}).
+		AddRow(4, "My latest blog post")
+
+	mock.ExpectQuery("^SELECT (.+) FROM posts WHERE id = (.+)$").WillReturnRows(rows)
+
+	// now we execute our request
+	app.getPost(w, req)
+
+	if w.Code != 200 {
+		t.Fatalf("expected status code to be 200, but got: %d", w.Code)
+	}
+
+}
