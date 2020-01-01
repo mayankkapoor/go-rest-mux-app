@@ -1,5 +1,5 @@
 # build stage
-FROM golang:1.12-alpine AS build-env
+FROM golang:1.13-alpine AS build-env
 RUN apk add --no-cache git mercurial \
    && go get github.com/go-sql-driver/mysql \
    && go get github.com/gorilla/mux \

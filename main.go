@@ -9,6 +9,7 @@ import (
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
+	log "github.com/sirupsen/logrus"
 )
 
 type api struct {
@@ -45,7 +46,7 @@ func main() {
 	dbName := getEnv("DB_NAME", "dev")
 	db, err := sql.Open("mysql", databaseURL+dbName)
 	if err != nil {
-		panic(err.Error())
+		log.Error(err)
 	}
 	defer db.Close()
 

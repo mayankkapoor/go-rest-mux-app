@@ -9,6 +9,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	log "github.com/sirupsen/logrus"
 )
 
 // A post object has an auto-generated id and a title
@@ -75,12 +76,12 @@ func (a *api) getPosts(w http.ResponseWriter, r *http.Request) {
 func (a *api) createPost(w http.ResponseWriter, r *http.Request) {
 	stmt, err := a.db.Prepare("INSERT INTO posts(title) VALUES(?)")
 	if err != nil {
-		panic(err.Error())
+		log.Error(err)
 	}
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		panic(err.Error())
+		log.Error(err)
 	}
 
 	keyVal := make(map[string]string)
@@ -89,7 +90,7 @@ func (a *api) createPost(w http.ResponseWriter, r *http.Request) {
 
 	_, err = stmt.Exec(title)
 	if err != nil {
-		panic(err.Error())
+		log.Error(err)
 	}
 
 	fmt.Fprintf(w, "New post was created")
@@ -100,7 +101,7 @@ func (a *api) getPost(w http.ResponseWriter, r *http.Request) {
 
 	rows, err := a.db.Query("SELECT id, title FROM posts WHERE id = ?", params["id"])
 	if err != nil {
-		panic(err.Error())
+		log.Error(err)
 	}
 	defer rows.Close()
 
@@ -121,12 +122,12 @@ func (a *api) updatePost(w http.ResponseWriter, r *http.Request) {
 
 	stmt, err := a.db.Prepare("UPDATE posts SET title = ? WHERE id = ?")
 	if err != nil {
-		panic(err.Error())
+		log.Error(err)
 	}
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		panic(err.Error())
+		log.Error(err)
 	}
 
 	keyVal := make(map[string]string)
@@ -135,7 +136,7 @@ func (a *api) updatePost(w http.ResponseWriter, r *http.Request) {
 
 	_, err = stmt.Exec(newTitle, params["id"])
 	if err != nil {
-		panic(err.Error())
+		log.Error(err)
 	}
 
 	fmt.Fprintf(w, "Post with ID = %s was updated", params["id"])
@@ -146,12 +147,12 @@ func (a *api) deletePost(w http.ResponseWriter, r *http.Request) {
 
 	stmt, err := a.db.Prepare("DELETE FROM posts WHERE id = ?")
 	if err != nil {
-		panic(err.Error())
+		log.Error(err)
 	}
 
 	_, err = stmt.Exec(params["id"])
 	if err != nil {
-		panic(err.Error())
+		log.Error(err)
 	}
 
 	fmt.Fprintf(w, "Post with ID = %s was deleted", params["id"])
