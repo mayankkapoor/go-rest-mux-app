@@ -20,7 +20,23 @@ func (cf CarFactory) MakeCar(name string) Car {
 	return Car{name}
 }
 
-func Transport(cf CarFactory) {
+func Transport(cf ICarFactory) {
 	car := cf.MakeCar("lamborghini")
 	car.Run()
+}
+
+type ICar interface {
+	Run()
+}
+
+type ICarFactory interface {
+	MakeCar(name string) ICar
+}
+
+type CarFactoryWrapper struct {
+	CarFactory
+}
+
+func (cf CarFactoryWrapper) MakeCar(name string) ICar {
+	return cf.CarFactory.MakeCar(name)
 }
